@@ -75,8 +75,8 @@ class PipelinePlanner:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
         self.dlg = PipelinePlannerDialog()
-        self.dlg.tblImpacts.setColumnWidth(1, 50)
-        self.dlg.tblImpacts.setColumnWidth(2, 225)
+        self.dlg.tblImpacts.setColumnWidth(1, 75)
+        self.dlg.tblImpacts.setColumnWidth(2, 250)
         self.dlg.tblImpacts.setColumnWidth(3, 75)
 
     # noinspection PyMethodMayBeStatic
@@ -203,8 +203,8 @@ class PipelinePlanner:
         elif button == Qt.RightButton:
             pipeline = self.rbPipeline.asGeometry()
             self.dlg.tblImpacts.setRowCount(0)
-            lyrRaptor = QgsProject.instance().mapLayersByName("Raptor Buffer")[0]
 
+            lyrRaptor = QgsProject.instance().mapLayersByName("Raptor Buffer")[0]
             raptors = lyrRaptor.getFeatures(pipeline.boundingBox())
             for raptor in raptors:
                 valConstraint = raptor.attribute("recentspec")
@@ -212,6 +212,36 @@ class PipelinePlanner:
                 valStatus = raptor.attribute("recentstat")
                 valDistance = pipeline.distance(raptor.geometry().centroid())
                 if raptor.geometry().intersects(pipeline):
+                    row = self.dlg.tblImpacts.rowCount()
+                    self.dlg.tblImpacts.insertRow(row)
+                    self.dlg.tblImpacts.setItem(row, 0, QTableWidgetItem(valConstraint))
+                    self.dlg.tblImpacts.setItem(row, 1, QTableWidgetItem(str(valID)))
+                    self.dlg.tblImpacts.setItem(row, 2, QTableWidgetItem(valStatus))
+                    self.dlg.tblImpacts.setItem(row, 3, QTableWidgetItem("{:4.5f}".format(valDistance)))
+
+            lyrEagle = QgsProject.instance().mapLayersByName("BAEA Buffer")[0]
+            eagles = lyrEagle.getFeatures(pipeline.boundingBox())
+            for eagle in eagles:
+                valConstraint = "BAEA Nest"
+                valID = eagle.attribute("nest_ID")
+                valStatus = eagle.attribute("status")
+                valDistance = pipeline.distance(eagle.geometry().centroid())
+                if eagle.geometry().intersects(pipeline):
+                    row = self.dlg.tblImpacts.rowCount()
+                    self.dlg.tblImpacts.insertRow(row)
+                    self.dlg.tblImpacts.setItem(row, 0, QTableWidgetItem(valConstraint))
+                    self.dlg.tblImpacts.setItem(row, 1, QTableWidgetItem(str(valID)))
+                    self.dlg.tblImpacts.setItem(row, 2, QTableWidgetItem(valStatus))
+                    self.dlg.tblImpacts.setItem(row, 3, QTableWidgetItem("{:4.5f}".format(valDistance)))
+
+            lyrBUOWL = QgsProject.instance().mapLayersByName("BUOWL Buffer")[0]
+            buowls = lyrBUOWL.getFeatures(pipeline.boundingBox())
+            for buowl in buowls:
+                valConstraint = "BUOWL Habitat"
+                valID = buowl.attribute("habitat_id")
+                valStatus = buowl.attribute("recentstat")
+                valDistance = pipeline.distance(buowl.geometry().buffer(-0.001, 5))
+                if buowl.geometry().intersects(pipeline):
                     row = self.dlg.tblImpacts.rowCount()
                     self.dlg.tblImpacts.insertRow(row)
                     self.dlg.tblImpacts.setItem(row, 0, QTableWidgetItem(valConstraint))
